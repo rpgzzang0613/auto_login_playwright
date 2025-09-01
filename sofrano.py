@@ -90,7 +90,9 @@ def go_sofrano(page: Page, id: str, pw: str) -> dict:
 
                 msg_for_return += f"소프라노몰 출석체크 결과 : {dialog.message}\n"
                 print(f"소프라노몰 출석체크 결과 : {dialog.message}", flush=True)
-                dialog.accept()
+
+                with page.expect_navigation(wait_until="load", timeout=10000):
+                    dialog.accept()
 
                 # 출석 완료 버튼 존재 여부 확인
                 if not page.locator("#attendWriteForm span.gRight a").first.is_visible():
