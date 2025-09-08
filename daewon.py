@@ -89,7 +89,7 @@ def go_daewon(page: Page, id: str, pw: str) -> dict:
                 result_msg = modal_content.locator(".dpromotion-alert__message").inner_text()
             except:
                 result_msg = modal_content.inner_text()
-            msg_for_return += f"대원샵 출석체크 결과 : {result_msg}\n"
+            msg_for_return += f"대원샵 출석체크 결과 : *{result_msg.replace('\n', ' ')}*\n"
             print(f"대원샵 출석체크 결과 : {result_msg}", flush=True)
 
             succeed = True

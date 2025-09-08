@@ -88,7 +88,7 @@ def go_sofrano(page: Page, id: str, pw: str) -> dict:
 
                 dialog = dialog_info.value
 
-                msg_for_return += f"소프라노몰 출석체크 결과 : {dialog.message}\n"
+                msg_for_return += f"소프라노몰 출석체크 결과 : *{dialog.message}*\n"
                 print(f"소프라노몰 출석체크 결과 : {dialog.message}", flush=True)
 
                 with page.expect_navigation(wait_until="load", timeout=10000):

@@ -48,7 +48,7 @@ def go_playshop(page: Page, id: str, pw: str) -> dict:
 
             dialog = dialog_info.value
 
-            msg_for_return += f"플레이샵 출석체크 결과 : {dialog.message}\n"
+            msg_for_return += f"플레이샵 출석체크 결과 : *{dialog.message}*\n"
             print(f"플레이샵 출석체크 결과 : {dialog.message}", flush=True)
             dialog.accept()
 

@@ -50,7 +50,7 @@ def main():
         print(msg_for_slack, flush=True)
 
         # 결과 요약
-        summary = f"대원샵: {'성공' if succeed_daewon else '실패'}, 소프라노몰: {'성공' if succeed_sofrano else '실패'}, 플레이샵: {'성공' if succeed_playshop else '실패'}\n"
+        summary = f"대원샵: {':white_check_mark: *성공*' if succeed_daewon else ':x: *실패*'}, 소프라노몰: {':white_check_mark: *성공*' if succeed_sofrano else ':x: *실패*'}, 플레이샵: {':white_check_mark: *성공*' if succeed_playshop else ':x: *실패*'}\n"
         print(summary, flush=True)
         msg_for_slack += summary
 
