@@ -4,6 +4,7 @@ from PIL import Image
 import pytesseract
 import platform
 import io
+import re
 
 @retry(times=2)
 def go_sofrano(page: Page, id: str, pw: str) -> dict:
@@ -72,7 +73,13 @@ def go_sofrano(page: Page, id: str, pw: str) -> dict:
                 else:
                     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
-                captcha_text = pytesseract.image_to_string(new_img, lang="eng").replace("\n", "")
+                captcha_text = pytesseract.image_to_string(
+                    new_img,
+                    lang="eng",
+                    config="--psm 7 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyz0123456789"
+                ).replace("\n", "")
+
+                captcha_text = re.sub(r"[^a-z0-9]", "", captcha_text)
 
                 msg_for_return += f"Captcha 추출: {captcha_text}\n"
                 print(f"Captcha 추출: {captcha_text}", flush=True)
