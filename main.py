@@ -8,6 +8,7 @@ from util import send_slack_msg
 from daewon import go_daewon
 from sofrano import go_sofrano
 from playshop import go_playshop
+from yepanrun import go_yepanrun
 
 def main():
     dotenv.load_dotenv()
@@ -44,13 +45,20 @@ def main():
             msg_for_slack += playshop_result["msg_for_return"]
             succeed_playshop = playshop_result["succeed"]
 
+            # 예판런 출석체크
+            yepanrun_id = os.getenv("YEPANRUN_ID")
+            yepanrun_pw = os.getenv("YEPANRUN_PW")
+            yepanrun_result = go_yepanrun(page, yepanrun_id, yepanrun_pw)
+            msg_for_slack += yepanrun_result["msg_for_return"]
+            succeed_yepanrun = yepanrun_result["succeed"]
+
             browser.close()
 
         msg_for_slack += "- - 출석체크 완료 - -\n"
         print(msg_for_slack, flush=True)
 
         # 결과 요약
-        summary = f"대원샵: {':white_check_mark: *성공*' if succeed_daewon else ':x: *실패*'}, 소프라노몰: {':white_check_mark: *성공*' if succeed_sofrano else ':x: *실패*'}, 플레이샵: {':white_check_mark: *성공*' if succeed_playshop else ':x: *실패*'}\n"
+        summary = f"대원샵: {':white_check_mark: *성공*' if succeed_daewon else ':x: *실패*'}, 소프라노몰: {':white_check_mark: *성공*' if succeed_sofrano else ':x: *실패*'}, 플레이샵: {':white_check_mark: *성공*' if succeed_playshop else ':x: *실패*'}, 예판런: {':white_check_mark: *성공*' if succeed_yepanrun else ':x: *실패*'}\n"
         print(summary, flush=True)
         msg_for_slack += summary
 

@@ -1,4 +1,4 @@
-# auto_login_playwright (대원샵, 소프라노몰, 플레이샵 출석체크)
+# auto_login_playwright (대원샵, 소프라노몰, 플레이샵, 예판런 출석체크)
    
 1. 파이썬 설치 (현재 패키지는 3.13.7에 맞춰져 있음)
 2. 가상환경 세팅
@@ -42,6 +42,8 @@
     SOFRANO_PW="비번"   
     PLAYSHOP_ID="아이디"   
     PLAYSHOP_PW="비번"   
+    YEPANRUN_ID="아이디"   
+    YEPANRUN_PW="비번"   
     ```
     써놓고 저장. SLACK 관련사항은 선택사항이므로 없으면 ""로 써놓거나 아예 항목을 없애면 됨   
    

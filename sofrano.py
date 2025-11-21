@@ -19,7 +19,7 @@ def go_sofrano(page: Page, id: str, pw: str) -> dict:
     print("- 소프라노몰 출석체크 시작 -", flush=True)
 
     try:
-        # 1. 페이지 진입 시 뜨는 초기 alert 한 번만 자동 수락
+        # 1. 페이지 진입 시 뜨는 초기 alert 한 번만 자동 수락하는 이벤트 리스너 등록
         page.once("dialog", lambda d: d.accept())
         
         # 2. 출석체크 페이지 접속
