@@ -48,7 +48,7 @@ def go_yepanrun(page: Page, id: str, pw: str) -> dict:
 
         dialog = dialog_info.value
 
-        msg_for_return += f"예판런 출석체크 결과: {dialog.message}\n"
+        msg_for_return += f"예판런 출석체크 결과: *{dialog.message}*\n"
         print(f"예판런 출석체크 결과: {dialog.message}", flush=True)
         dialog.accept()
 
