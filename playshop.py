@@ -31,8 +31,22 @@ def go_playshop(page: Page, id: str, pw: str) -> dict:
         with page.expect_navigation(wait_until="load", timeout=15000):
             page.locator("button.loginBtn").click()
 
+        page.wait_for_load_state("domcontentloaded")
+
         msg_for_return += "플레이샵 로그인 완료\n"
         print("플레이샵 로그인 완료", flush=True)
+
+        if "change_passwd.html" in page.url:
+            msg_for_return += "출석체크 페이지가 아니라 비밀번호 변경 페이지에 진입\n"
+            print("출석체크 페이지가 아니라 비밀번호 변경 페이지에 진입")
+
+            form = page.locator("#changePasswdForm")
+            form.locator("a:has-text('다음에 변경')").click()
+
+            page.goto("https://playshop.co.kr/attend/stamp.html")
+            page.wait_for_load_state("domcontentloaded")
+            msg_for_return += "플레이샵 출석체크 페이지 다시 진입\n"
+            print("플레이샵 출석체크 페이지 다시 진입", flush=True)
 
         # 4. 출석체크
         check_btn = page.locator("#attendWriteForm a.btnSubmitFix").first

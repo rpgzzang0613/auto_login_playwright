@@ -1,5 +1,7 @@
 from playwright.sync_api import Page
 from util import retry
+from datetime import datetime
+import re
 
 @retry(times=2)
 def go_daewon(page: Page, id: str, pw: str) -> dict:
@@ -54,51 +56,85 @@ def go_daewon(page: Page, id: str, pw: str) -> dict:
             login_page.close()
             page.bring_to_front()
 
-        # 4. 출석체크 페이지 이동
-        page.goto("https://www.daewonshop.com/cs/attend")
-        msg_for_return += "대원샵 출석체크 페이지 진입\n"
-        print("대원샵 출석체크 페이지 진입", flush=True)
+        # 4. 출석체크 페이지 찾기
+        page.goto("https://www.daewonshop.com/cs/event")
+        msg_for_return += "대원샵 이벤트 목록 페이지 진입\n"
+        print("대원샵 이벤트 목록 페이지 진입", flush=True)
+
+        li_list = page.locator('ul#cs-event-template-render > li')
+
+        for i in range(li_list.count()):
+            li_item = li_list.nth(i)
+            li_title = li_item.locator("p.tit").text_content().strip()
+
+            if "출석체크" not in li_title and "출석 체크" not in li_title:
+                continue
+
+            li_date_range = li_item.locator("p.date").text_content().strip()
+            if li_date_range == "상시":
+
+                msg_for_return += f"상시 출석체크 이벤트 발견: {li_title}\n"
+                print(f"상시 출석체크 이벤트 발견: {li_title}", flush=True)
+                continue
+            
+            try:
+                start_str, end_str = [x.strip() for x in li_date_range.split("~")]
+                start_date = datetime.strptime(start_str, "%Y.%m.%d").date()
+                end_date = datetime.strptime(end_str, "%Y.%m.%d").date()
+            except Exception as e:
+                msg_for_return += f"날짜 파싱 실패: {e}\n"
+                print(f"날짜 파싱 실패: {e}", flush=True)
+                continue
+
+            today = datetime.now().date()
+
+            if not (start_date <= today <= end_date):
+                msg_for_return += f"지나간 달의 출석체크는 패스: {li_title}\n"
+                print(f"지나간 달의 출석체크는 패스: {li_title}", flush=True)
+                continue
+
+            li_item.locator("a").click()
+            msg_for_return += f"대원샵 출석체크 페이지 진입: {li_title}\n"
+            print(f"대원샵 출석체크 페이지 진입: {li_title}", flush=True)
+            break
 
         # 5. 출석 체크 버튼 클릭
+
         try:
-            dw_check_btn = page.locator(".attendance-check-btn")
-            dw_check_btn.wait_for(state="visible", timeout=20000)
-            dw_check_btn.click()
+            page.wait_for_timeout(10000)
+
+            iframe = page.frame(
+                url=re.compile(r"eventkiki\.com/widget/widget/ekiki-calendar_db\.php")
+            )
+
+            iframe.wait_for_selector("#eventkiki-calendar-press", timeout=20000)
+            iframe.locator("#eventkiki-calendar-press").click()
+
             msg_for_return += "대원샵 출석체크 버튼 클릭\n"
             print("대원샵 출석체크 버튼 클릭", flush=True)
-        except:
-            msg_for_return += "대원샵 출석체크 버튼 찾기 실패\n"
-            print("대원샵 출석체크 버튼 찾기 실패", flush=True)
+        except Exception as e:
+            msg_for_return += f"대원샵 출석체크 버튼 찾기 실패: {e}\n"
+            print(f"대원샵 출석체크 버튼 찾기 실패: {e}", flush=True)
             return {"succeed": False, "msg_for_return": msg_for_return}
 
         # 6. 모달 처리
         try:
-            modal_content = page.locator("section.dpromotion-modal-content")
-            modal_content.wait_for(state="visible", timeout=10000)
+            modal_win = iframe.locator("#eventkikiWin .new_eventkiki_win")
+            error_layer = iframe.locator("#reward_error_layer")
 
-            # 6-1. 동의 체크 및 확인 버튼 클릭
-            try:
-                if modal_content.locator("form").count() > 0:
-                    modal_content.locator(".dpromotion-agreement__item-title").click()
-                    modal_content.locator(".dpromotion-modal__button.confirm").click()
-            except:
-                pass
+            is_win = modal_win.evaluate("el => window.getComputedStyle(el).display") != "none"
+            is_err = error_layer.evaluate("el => window.getComputedStyle(el).display") != "none"
 
-            # 6-2. 결과 메시지 확인
-            try:
-                result_msg = modal_content.locator(".dpromotion-alert__message").inner_text()
-            except:
-                result_msg = modal_content.inner_text()
-            msg_for_return += f"대원샵 출석체크 결과 : *{result_msg.replace('\n', ' ')}*\n"
-            print(f"대원샵 출석체크 결과 : {result_msg}", flush=True)
+            if is_win and not is_err:
+                msg_for_return += "대원샵 출석체크 완료\n"
+                print("대원샵 출석체크 완료", flush=True)
 
-            succeed = True
-
-            # 6-3. 모달 닫기
-            try:
-                modal_content.locator("button.dpromotion-modal-close").click()
-            except:
-                pass
+                modal_win.locator("#btnRwdClose").click()
+                succeed = True
+            else:
+                msg_for_return += "대원샵 출석체크 이미 참여함\n"
+                print("대원샵 출석체크 이미 참여함", flush=True)
+                succeed = True
         except:
             msg_for_return += "대원샵 모달 처리 실패\n"
             print("대원샵 모달 처리 실패", flush=True)

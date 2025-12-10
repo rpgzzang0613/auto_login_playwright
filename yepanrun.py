@@ -46,15 +46,15 @@ def go_yepanrun(page: Page, id: str, pw: str) -> dict:
                 msg_for_return += "출석체크 버튼 클릭\n"
                 print("출석체크 버튼 클릭", flush=True)
 
-        dialog = dialog_info.value
+            dialog = dialog_info.value
 
-        msg_for_return += f"예판런 출석체크 결과: *{dialog.message}*\n"
-        print(f"예판런 출석체크 결과: {dialog.message}", flush=True)
-        dialog.accept()
+            msg_for_return += f"예판런 출석체크 결과: *{dialog.message}*\n"
+            print(f"예판런 출석체크 결과: {dialog.message}", flush=True)
+            dialog.accept()
 
-        # 출석 완료 버튼 존재 여부 확인
-        if not page.locator("#attendWriteForm p.ec-base-button a.btnSubmitFix").first.is_visible():
-            succeed = True
+            # 출석 완료 버튼 존재 여부 확인
+            if not page.locator("#attendWriteForm p.ec-base-button a.btnSubmitFix").first.is_visible():
+                succeed = True
     except Exception as e:
         msg_for_return += f"예외 발생: {e}\n"
         print(f"예외 발생: {e}", flush=True)
