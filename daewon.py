@@ -61,42 +61,57 @@ def go_daewon(page: Page, id: str, pw: str) -> dict:
         msg_for_return += "대원샵 이벤트 목록 페이지 진입\n"
         print("대원샵 이벤트 목록 페이지 진입", flush=True)
 
-        li_list = page.locator('ul#cs-event-template-render > li')
+        event_found = False
+        pagenate_list = page.locator('#pagging-wrap .page-area ul.list li a')
+        event_page_count = pagenate_list.count()
+        
+        for page_idx in range(event_page_count):
+            if page_idx > 0:
+                pagenate_list.nth(page_idx).click()
+                page.wait_for_timeout(2000)
+                msg_for_return += f"대원샵 이벤트 목록 페이지 {page_idx + 1} 진입\n"
+                print(f"대원샵 이벤트 목록 페이지 {page_idx + 1} 진입", flush=True)
 
-        for i in range(li_list.count()):
-            li_item = li_list.nth(i)
-            li_title = li_item.locator("p.tit").text_content().strip()
+            li_list = page.locator('ul#cs-event-template-render > li')
 
-            if "출석체크" not in li_title and "출석 체크" not in li_title:
-                continue
+            for i in range(li_list.count()):
+                li_item = li_list.nth(i)
+                li_title = li_item.locator("p.tit").text_content().strip()
 
-            li_date_range = li_item.locator("p.date").text_content().strip()
-            if li_date_range == "상시":
+                if "출석체크" not in li_title and "출석 체크" not in li_title:
+                    continue
 
-                msg_for_return += f"상시 출석체크 이벤트 발견: {li_title}\n"
-                print(f"상시 출석체크 이벤트 발견: {li_title}", flush=True)
-                continue
+
+                li_date_range = li_item.locator("p.date").text_content().strip()
+                if li_date_range == "상시":
+                    msg_for_return += f"상시 출석체크 이벤트 발견: {li_title}\n"
+                    print(f"상시 출석체크 이벤트 발견: {li_title}", flush=True)
+                    continue
             
-            try:
-                start_str, end_str = [x.strip() for x in li_date_range.split("~")]
-                start_date = datetime.strptime(start_str, "%Y.%m.%d").date()
-                end_date = datetime.strptime(end_str, "%Y.%m.%d").date()
-            except Exception as e:
-                msg_for_return += f"날짜 파싱 실패: {e}\n"
-                print(f"날짜 파싱 실패: {e}", flush=True)
-                continue
+                try:
+                    start_str, end_str = [x.strip() for x in li_date_range.split("~")]
+                    start_date = datetime.strptime(start_str, "%Y.%m.%d").date()
+                    end_date = datetime.strptime(end_str, "%Y.%m.%d").date()
+                except Exception as e:
+                    msg_for_return += f"날짜 파싱 실패: {e}\n"
+                    print(f"날짜 파싱 실패: {e}", flush=True)
+                    continue
 
-            today = datetime.now().date()
+                today = datetime.now().date()
 
-            if not (start_date <= today <= end_date):
-                msg_for_return += f"지나간 달의 출석체크는 패스: {li_title}\n"
-                print(f"지나간 달의 출석체크는 패스: {li_title}", flush=True)
-                continue
+                if not (start_date <= today <= end_date):
+                    msg_for_return += f"지나간 달의 출석체크는 패스: {li_title}\n"
+                    print(f"지나간 달의 출석체크는 패스: {li_title}", flush=True)
+                    continue
 
-            li_item.locator("a").click()
-            msg_for_return += f"대원샵 출석체크 페이지 진입: {li_title}\n"
-            print(f"대원샵 출석체크 페이지 진입: {li_title}", flush=True)
-            break
+                li_item.locator("a").click()
+                msg_for_return += f"대원샵 출석체크 페이지 진입: {li_title}\n"
+                print(f"대원샵 출석체크 페이지 진입: {li_title}", flush=True)
+                event_found = True
+                break
+
+            if event_found:
+                break
 
         # 5. 출석 체크 버튼 클릭
 
