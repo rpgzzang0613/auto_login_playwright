@@ -52,8 +52,13 @@ def go_yepanrun(page: Page, id: str, pw: str) -> dict:
                     succeed = True
                     break
 
+                check_btn.wait_for(state="visible")
+                check_btn.wait_for(state="attached")
+                page.wait_for_timeout(300)
+
                 check_btn.click()
 
+                page.locator(".attendSecurityLayer").wait_for(state="attached", timeout=10000)
                 page.locator(".attendSecurityLayer").wait_for(state="visible", timeout=10000)
 
                 msg_for_return += "Captcha 모달 오픈\n"
