@@ -50,7 +50,14 @@ def go_playshop(page: Page, id: str, pw: str) -> dict:
 
         # 4. 출석체크
         check_btn = page.locator("#attendWriteForm a.btnSubmitFix").first
-        if not check_btn.is_visible():
+
+        try:
+            check_btn.wait_for(state="visible", timeout=5000)
+            button_exists = True
+        except:
+            button_exists = False
+
+        if not button_exists:
             msg_for_return += "이미 출석 완료 상태라 버튼 없음\n"
             print("이미 출석 완료 상태라 버튼 없음", flush=True)
             succeed = True
