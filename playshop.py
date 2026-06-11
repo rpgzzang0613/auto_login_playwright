@@ -16,7 +16,7 @@ def go_playshop(page: Page, id: str, pw: str) -> dict:
     try:
         # 1. 페이지 진입 시 뜨는 초기 alert 한 번만 자동 수락
         page.once("dialog", lambda d: d.accept())
-        
+
         # 2. 출석체크 페이지 접속
         page.goto("https://playshop.co.kr/attend/stamp.html")
         page.wait_for_load_state("domcontentloaded")
@@ -24,12 +24,23 @@ def go_playshop(page: Page, id: str, pw: str) -> dict:
         print("플레이샵 출석체크 페이지 진입", flush=True)
 
         # 3. 로그인
-        page.locator("#member_id").wait_for(state="visible", timeout=15000)
+        is_returning_login_page = True
+
+        if not page.locator("#member_id").is_visible():
+            page.locator("#id-pass-login").click()
+            page.locator("#member_id").wait_for(state="visible", timeout=5000)
+            is_returning_login_page = False
+
         page.locator("#member_id").fill(id)
         page.locator("#member_passwd").fill(pw)
 
+        if is_returning_login_page:
+            login_btn = page.locator("button.loginBtn")
+        else:
+            login_btn = page.locator("button#modalLoginBtn")
+
         with page.expect_navigation(wait_until="load", timeout=15000):
-            page.locator("button.loginBtn").click()
+            login_btn.click()
 
         page.wait_for_load_state("domcontentloaded")
 
