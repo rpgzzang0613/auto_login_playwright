@@ -1,12 +1,11 @@
 from playwright.sync_api import Page
-from util import retry, convert_image
+from util import convert_image
 from PIL import Image
 import pytesseract
 import platform
 import io
 import re
 
-@retry(times=2)
 def go_yepanrun(page: Page, id: str, pw: str) -> dict:
     """
     예판런 로그인 + 출석 체크

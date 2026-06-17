@@ -1,7 +1,5 @@
 from playwright.sync_api import Page
-from util import retry
 
-@retry(times=2)
 def go_playshop(page: Page, id: str, pw: str) -> dict:
     """
     플레이샵 로그인 + 출석 체크

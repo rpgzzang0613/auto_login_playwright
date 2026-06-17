@@ -1,8 +1,6 @@
 from PIL import Image
 from slack_sdk import WebClient
 import os
-import time
-from functools import wraps
 
 def send_slack_msg(msg):
     """Slack 메시지 전송"""
@@ -42,18 +40,3 @@ def convert_image(original_img):
                 new_img.putpixel((x, y), (0, 0, 0))
     
     return new_img
-
-def retry(times=2, delay=1):
-    """재시도 데코레이터: 지정 횟수만큼 실패 시 재시도"""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            for attempt in range(times):
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    print(f"{func.__name__} 시도 {attempt+1} 실패: {e}")
-                    time.sleep(delay)
-            raise Exception(f"{func.__name__} 재시도 {times}회 실패")
-        return wrapper
-    return decorator
