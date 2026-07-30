@@ -22,20 +22,10 @@ def go_playshop(page: Page, id: str, pw: str) -> dict:
         print("플레이샵 출석체크 페이지 진입", flush=True)
 
         # 3. 로그인
-        is_returning_login_page = True
-
-        if not page.locator("#member_id").is_visible():
-            page.locator("#id-pass-login").click()
-            page.locator("#member_id").wait_for(state="visible", timeout=5000)
-            is_returning_login_page = False
-
         page.locator("#member_id").fill(id)
         page.locator("#member_passwd").fill(pw)
 
-        if is_returning_login_page:
-            login_btn = page.locator("button.loginBtn")
-        else:
-            login_btn = page.locator("button#modalLoginBtn")
+        login_btn = page.locator(".login .login__button a").filter(has_text="기존 회원 로그인").first
 
         with page.expect_navigation(wait_until="load", timeout=15000):
             login_btn.click()
