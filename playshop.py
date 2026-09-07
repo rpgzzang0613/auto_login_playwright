@@ -22,10 +22,14 @@ def go_playshop(page: Page, id: str, pw: str) -> dict:
         print("플레이샵 출석체크 페이지 진입", flush=True)
 
         # 3. 로그인
-        page.locator("#member_id").fill(id)
-        page.locator("#member_passwd").fill(pw)
+        # 새 로그인 위젯은 기존 ID가 있는 폼을 숨기고, ID 없이 같은 name을 사용한다.
+        # :visible로 실제 사용자에게 표시되는 입력란만 선택한다.
+        page.locator('input[name="member_id"]:visible').fill(id)
+        page.locator('input[name="member_passwd"]:visible').fill(pw)
 
-        login_btn = page.locator(".login .login__button a").filter(has_text="기존 회원 로그인").first
+        login_btn = page.locator(
+            "#normalLogin_id button.loginBtn:visible, .login .login__button a:visible"
+        ).filter(has_text="기존 회원 로그인")
 
         with page.expect_navigation(wait_until="load", timeout=15000):
             login_btn.click()
