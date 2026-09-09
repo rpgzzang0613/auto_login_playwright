@@ -61,3 +61,10 @@ jobs:
             --region=$GCP_REGION \
             --project=$GCP_PROJECT_ID \
             --quiet
+
+      - name: Delete old GHCR images
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: auto_login_playwright
+          package-type: container
+          min-versions-to-keep: 2
