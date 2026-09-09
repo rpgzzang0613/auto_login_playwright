@@ -1,4 +1,4 @@
-name: Build Docker Image
+name: Build and Deploy Docker Image
 
 on:
   push:
@@ -8,12 +8,16 @@ on:
 permissions:
   contents: read
   packages: write
+  id-token: write
 
 env:
   IMAGE_NAME: ghcr.io/rpgzzang0613/auto_login_playwright
+  GCP_PROJECT_ID: auto-login-playwright
+  GCP_REGION: asia-northeast3
+  CLOUD_RUN_JOB: auto-login-playwright
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -39,3 +43,21 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: projects/656593331073/locations/global/workloadIdentityPools/github-actions/providers/github
+          service_account: auto-login-deploy@auto-login-playwright.iam.gserviceaccount.com
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Update Cloud Run Job
+        run: |
+          gcloud run jobs update $CLOUD_RUN_JOB \
+            --image=$IMAGE_NAME:$GITHUB_SHA \
+            --region=$GCP_REGION \
+            --project=$GCP_PROJECT_ID \
+            --quiet
