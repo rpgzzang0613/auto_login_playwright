@@ -63,8 +63,47 @@ jobs:
             --quiet
 
       - name: Delete old GHCR images
-        uses: actions/delete-package-versions@v5
+        uses: actions/github-script@v9
         with:
-          package-name: auto_login_playwright
-          package-type: container
-          min-versions-to-keep: 2
+          script: |
+            const username = context.repo.owner;
+            const packageName = 'auto_login_playwright';
+
+            // GHCR package 버전 전체 조회
+            const versions = await github.paginate(
+              'GET /users/{username}/packages/{package_type}/{package_name}/versions',
+              {
+                username,
+                package_type: 'container',
+                package_name: packageName,
+                per_page: 100
+              }
+            );
+
+            // 태그가 붙은 실제 배포 이미지 버전만 대상으로 함
+            const taggedVersions = versions
+              .filter(version =>
+                version.metadata?.container?.tags?.length > 0
+              )
+              .sort((a, b) =>
+                new Date(b.created_at) - new Date(a.created_at)
+              );
+
+            // 최신 2개는 유지
+            const versionsToDelete = taggedVersions.slice(2);
+
+            for (const version of versionsToDelete) {
+              console.log(
+                `Delete version: ${version.id}, tags: ${version.metadata.container.tags.join(', ')}`
+              );
+
+              await github.request(
+                'DELETE /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}',
+                {
+                  username,
+                  package_type: 'container',
+                  package_name: packageName,
+                  package_version_id: version.id
+                }
+              );
+            }
